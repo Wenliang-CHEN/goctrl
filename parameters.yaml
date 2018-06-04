@@ -1,0 +1,3 @@
+# Folder locations
+# Put the yaml files for the pods here
+CLUSTER_SETTING_DIR=""
