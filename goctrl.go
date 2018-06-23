@@ -3,7 +3,9 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/smallfish/simpleyaml"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 )
@@ -17,6 +19,7 @@ func main() {
 	switch ctrlCmd {
 	case "start":
 		startMinikube()
+		createKubernetesObjects()
 	case "stop":
 		stopMinikube()
 	default:
@@ -25,12 +28,42 @@ func main() {
 }
 
 func startMinikube() {
-	fmt.Println("starting minikube")
 	runOsCommand("minikube", "start")
 }
 
+//TODO: add separate create and delete for each object
+func createKubernetesObjects() {
+	parameters := parseYaml("parameters.yaml")
+
+	configBasePath, err := parameters.Get("config-path").String()
+	objects, err := parameters.Get("objects").Array()
+
+	if err != nil {
+		panic(err)
+	}
+
+	for _, objectName := range objects {
+		fullPath := configBasePath + objectName.(string) + ".yaml"
+		runOsCommand("kubectl", "apply", "-f", fullPath)
+	}
+}
+
 func stopMinikube() {
-	fmt.Println("stoping minikube")
+	runOsCommand("minikube", "stop")
+}
+
+func parseYaml(filePath string) *simpleyaml.Yaml {
+	content, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		panic("unable to read file: " + filePath)
+	}
+
+	yaml, err := simpleyaml.NewYaml(content)
+	if err != nil {
+		panic(err)
+	}
+
+	return yaml
 }
 
 // TODO: handle error if i have time
@@ -64,7 +97,7 @@ func handleError() {
 	}
 }
 
-// TODO
+// TODO: Add help text
 func printHelpText() {
 	fmt.Println("this is help text")
 }

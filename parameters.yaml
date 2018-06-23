@@ -1,3 +1,8 @@
-# Folder locations
-# Put the yaml files for the pods here
-CLUSTER_SETTING_DIR=""
+# path of config files.  Use the object-name must equal to folder name for the config
+config-path: ""
+
+# Define kubernetes objects
+# - object-name:
+objects:
+  - "go-example"
+  
