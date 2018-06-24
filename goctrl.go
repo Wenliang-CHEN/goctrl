@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/smallfish/simpleyaml"
+	YamlUtil "github.com/smallfish/simpleyaml"
 	"io"
 	"io/ioutil"
 	"os"
@@ -15,11 +15,27 @@ const errInvalidCommand = "Invalid command"
 func main() {
 	defer handleError()
 
+	parameters := parseYaml("parameters.yaml")
 	ctrlCmd := os.Args[1]
+
 	switch ctrlCmd {
 	case "start":
 		startMinikube()
-		createKubernetesObjects()
+		//createKubernetesObjects()
+	case "create":
+		if len(os.Args) < 3 {
+			panic("Please enter object name")
+		}
+
+		objectName := os.Args[2]
+		createObject(parameters, objectName)
+	case "delete":
+		if len(os.Args) < 3 {
+			panic("Please enter object name")
+		}
+
+		objectName := os.Args[2]
+		deleteObject(parameters, objectName)
 	case "stop":
 		stopMinikube()
 	default:
@@ -31,7 +47,7 @@ func startMinikube() {
 	runOsCommand("minikube", "start")
 }
 
-//TODO: add separate create and delete for each object
+//TODO: Refactor this func
 func createKubernetesObjects() {
 	parameters := parseYaml("parameters.yaml")
 
@@ -43,22 +59,38 @@ func createKubernetesObjects() {
 	}
 
 	for _, objectName := range objects {
-		fullPath := configBasePath + objectName.(string) + ".yaml"
+		fullPath := configBasePath + objectName.(string)
 		runOsCommand("kubectl", "apply", "-f", fullPath)
 	}
+}
+
+func createObject(yaml *YamlUtil.Yaml, name string) {
+	runOsCommand("kubectl", "apply", "-f", getBasePath(yaml)+name)
+}
+
+func deleteObject(yaml *YamlUtil.Yaml, name string) {
+	runOsCommand("kubectl", "delete", "-f", getBasePath(yaml)+name)
+}
+
+func getBasePath(yaml *YamlUtil.Yaml) string {
+	configBasePath, err := yaml.Get("config-path").String()
+	if err != nil {
+		panic(err)
+	}
+	return configBasePath
 }
 
 func stopMinikube() {
 	runOsCommand("minikube", "stop")
 }
 
-func parseYaml(filePath string) *simpleyaml.Yaml {
+func parseYaml(filePath string) *YamlUtil.Yaml {
 	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		panic("unable to read file: " + filePath)
 	}
 
-	yaml, err := simpleyaml.NewYaml(content)
+	yaml, err := YamlUtil.NewYaml(content)
 	if err != nil {
 		panic(err)
 	}
