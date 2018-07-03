@@ -98,17 +98,26 @@ func parseYaml(filePath string) *YamlUtil.Yaml {
 	return yaml
 }
 
-// TODO: handle error if i have time
+// TODO: to capture error message
 func runOsCommand(rawCmd string, args ...string) {
-	var stdoutBuf bytes.Buffer
 	cmd := exec.Command(rawCmd, args...)
 
+	var stdoutBuf bytes.Buffer
 	stdoutIn, _ := cmd.StdoutPipe()
 	stdout := io.MultiWriter(os.Stdout, &stdoutBuf)
+
+	var stderrBuf bytes.Buffer
+	stdErrIn, _ := cmd.StderrPipe()
+	stdErr := io.MultiWriter(os.Stderr, &stderrBuf)
+
 	cmd.Start()
 
 	go func() {
 		io.Copy(stdout, stdoutIn)
+	}()
+
+	go func() {
+		io.Copy(stdErr, stdErrIn)
 	}()
 
 	cmd.Wait()
