@@ -1,5 +1,5 @@
 # path of config files.  Use the object-name must equal to folder name for the config
-config-path: ""
+config-path: "/Users/bruceadmin/CodeBase/kubernetes-objects/"
 
 # Define kubernetes objects
 # - object-name:
