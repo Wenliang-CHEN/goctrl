@@ -1,0 +1,19 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "1fMw8PH4tGzXvb0W1ZuxxESRcoA=",
+			"path": "github.com/smallfish/simpleyaml",
+			"revision": "a32031077861b1fbdf988d2c0865e98ec832dd4c",
+			"revisionTime": "2017-09-11T01:58:56Z"
+		},
+		{
+			"checksumSHA1": "ZSWoOPUNRr5+3dhkLK3C4cZAQPk=",
+			"path": "gopkg.in/yaml.v2",
+			"revision": "5420a8b6744d3b0345ab293f6fcba19c978f1183",
+			"revisionTime": "2018-03-28T19:50:20Z"
+		}
+	],
+	"rootPath": "goCtrl"
+}

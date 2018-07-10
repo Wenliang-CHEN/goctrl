@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	YamlUtil "github.com/smallfish/simpleyaml"
+	parser "goCtrl/parser/yaml"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 )
@@ -15,13 +15,13 @@ const errInvalidCommand = "Invalid command"
 func main() {
 	defer handleError()
 
-	parameters := parseYaml("parameters.yaml")
+	parameters := parser.Parse("config/parameters.yaml")
 	ctrlCmd := os.Args[1]
 
 	switch ctrlCmd {
 	case "start":
 		startMinikube()
-		//createKubernetesObjects()
+		createKubernetesObjects()
 	case "create":
 		if len(os.Args) < 3 {
 			panic("Please enter object name")
@@ -49,7 +49,7 @@ func startMinikube() {
 
 //TODO: Refactor this func
 func createKubernetesObjects() {
-	parameters := parseYaml("parameters.yaml")
+	parameters := parser.Parse("config/parameters.yaml")
 
 	configBasePath, err := parameters.Get("config-path").String()
 	objects, err := parameters.Get("objects").Array()
@@ -82,20 +82,6 @@ func getBasePath(yaml *YamlUtil.Yaml) string {
 
 func stopMinikube() {
 	runOsCommand("minikube", "stop")
-}
-
-func parseYaml(filePath string) *YamlUtil.Yaml {
-	content, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		panic("unable to read file: " + filePath)
-	}
-
-	yaml, err := YamlUtil.NewYaml(content)
-	if err != nil {
-		panic(err)
-	}
-
-	return yaml
 }
 
 // TODO: to capture error message
