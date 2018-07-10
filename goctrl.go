@@ -79,3 +79,49 @@ func getBasePath(yaml *Yaml) string {
 func stopMinikube() {
 	oscmd.Run("minikube", "stop")
 }
+
+// TODO: to capture error message
+func runOsCommand(rawCmd string, args ...string) {
+	cmd := exec.Command(rawCmd, args...)
+
+	var stdoutBuf bytes.Buffer
+	stdoutIn, _ := cmd.StdoutPipe()
+	stdout := io.MultiWriter(os.Stdout, &stdoutBuf)
+
+	var stderrBuf bytes.Buffer
+	stdErrIn, _ := cmd.StderrPipe()
+	stdErr := io.MultiWriter(os.Stderr, &stderrBuf)
+
+	cmd.Start()
+
+	go func() {
+		io.Copy(stdout, stdoutIn)
+	}()
+
+	go func() {
+		io.Copy(stdErr, stdErrIn)
+	}()
+
+	cmd.Wait()
+}
+
+func handleError() {
+	err := recover()
+	if err == nil {
+		return
+	}
+
+	switch err {
+	case errInvalidCommand:
+		fmt.Println(err)
+		printHelpText()
+	default:
+		fmt.Println(err)
+	}
+}
+
+// TODO: Add help text
+func printHelpText() {
+	fmt.Println("this is help text")
+>>>>>>> Add vendor handling and refactor package structure
+}
