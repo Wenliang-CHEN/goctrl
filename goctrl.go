@@ -17,7 +17,7 @@ func main() {
 	switch ctrlCmd {
 	case "start":
 		startMinikube()
-		createKubernetesObjects()
+		createObjects(parameters)
 	case "create":
 		if len(os.Args) < 3 {
 			panic("Please enter object name")
@@ -43,20 +43,14 @@ func startMinikube() {
 	oscmd.Run("minikube", "start")
 }
 
-//TODO: Refactor this func
-func createKubernetesObjects() {
-	parameters := parser.Parse("config/parameters.yaml")
-
-	configBasePath, err := parameters.Get("config-path").String()
-	objects, err := parameters.Get("objects").Array()
-
+func createObjects(yaml *Yaml) {
+	objects, err := yaml.Get("objects").Array()
 	if err != nil {
 		panic(err)
 	}
 
 	for _, objectName := range objects {
-		fullPath := configBasePath + objectName.(string)
-		oscmd.Run("kubectl", "apply", "-f", fullPath)
+		createObject(yaml, objectName.(string))
 	}
 }
 
@@ -78,50 +72,4 @@ func getBasePath(yaml *Yaml) string {
 
 func stopMinikube() {
 	oscmd.Run("minikube", "stop")
-}
-
-// TODO: to capture error message
-func runOsCommand(rawCmd string, args ...string) {
-	cmd := exec.Command(rawCmd, args...)
-
-	var stdoutBuf bytes.Buffer
-	stdoutIn, _ := cmd.StdoutPipe()
-	stdout := io.MultiWriter(os.Stdout, &stdoutBuf)
-
-	var stderrBuf bytes.Buffer
-	stdErrIn, _ := cmd.StderrPipe()
-	stdErr := io.MultiWriter(os.Stderr, &stderrBuf)
-
-	cmd.Start()
-
-	go func() {
-		io.Copy(stdout, stdoutIn)
-	}()
-
-	go func() {
-		io.Copy(stdErr, stdErrIn)
-	}()
-
-	cmd.Wait()
-}
-
-func handleError() {
-	err := recover()
-	if err == nil {
-		return
-	}
-
-	switch err {
-	case errInvalidCommand:
-		fmt.Println(err)
-		printHelpText()
-	default:
-		fmt.Println(err)
-	}
-}
-
-// TODO: Add help text
-func printHelpText() {
-	fmt.Println("this is help text")
->>>>>>> Add vendor handling and refactor package structure
 }
