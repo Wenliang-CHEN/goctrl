@@ -6,6 +6,7 @@ import (
 	oscmd "goCtrl/oscmd"
 	parser "goCtrl/parser"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -32,6 +33,21 @@ func main() {
 
 		objectName := os.Args[2]
 		deleteObject(parameters, objectName)
+	case "exec":
+		if len(os.Args) < 3 {
+			panic("Please enter object name")
+		}
+
+		if len(os.Args) < 4 {
+			panic("Please enter the command you want to run")
+		}
+
+		if len(os.Args) == 4 {
+			execCmdInPod(os.Args[2], os.Args[3])
+			return
+		}
+
+		execCmdInPod(os.Args[2], os.Args[3], os.Args[4:]...)
 	case "stop":
 		stopMinikube()
 	default:
@@ -60,6 +76,14 @@ func createObject(yaml *Yaml, name string) {
 
 func deleteObject(yaml *Yaml, name string) {
 	oscmd.Run("kubectl", "delete", "-f", getBasePath(yaml)+name)
+}
+
+// I think coz golang run it in its vm, there is no change to do it in interactive mode
+func execCmdInPod(appName string, cmd string, innerArgs ...string) {
+	fullPodName := oscmd.RunForResult("kubectl", "get", "pod", "-l", "app="+appName, "-o", "name")
+
+	baseKubeArgs := []string{"exec", strings.Trim(fullPodName, "pods/ \n"), cmd}
+	oscmd.Run("kubectl", append(baseKubeArgs, innerArgs...)...)
 }
 
 func getBasePath(yaml *Yaml) string {
