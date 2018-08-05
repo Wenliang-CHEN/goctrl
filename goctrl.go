@@ -72,23 +72,26 @@ func createObjects(yaml *Yaml) {
 }
 
 func createObject(yaml *Yaml, name string) {
+	assertNameInConfig(yaml, name)
+	oscmd.Run("kubectl", "apply", "-f", getBasePath(yaml)+name)
+}
+
+func deleteObject(yaml *Yaml, name string) {
+	assertNameInConfig(yaml, name)
+	oscmd.Run("kubectl", "delete", "-f", getBasePath(yaml)+name)
+}
+
+func assertNameInConfig(yaml *Yaml, name string) {
 	objects, err := yaml.Get("objects").Array()
 	if err != nil {
 		panic(err)
 	}
 
-	if !slice.ContainsString(objects, name) {
+	if !slice.ContainsName(objects, name) {
 		panic("Object name " + name + " not defined in config file")
 	}
-
-	oscmd.Run("kubectl", "apply", "-f", getBasePath(yaml)+name)
 }
 
-func deleteObject(yaml *Yaml, name string) {
-	oscmd.Run("kubectl", "delete", "-f", getBasePath(yaml)+name)
-}
-
-// I think coz golang run it in its vm, there is no change to do it in interactive mode
 func execCmdInPod(appName string, cmd string, innerArgs ...string) {
 	fullPodName := oscmd.RunForResult("kubectl", "get", "pod", "-l", "app="+appName, "-o", "name")
 
