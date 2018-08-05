@@ -5,6 +5,7 @@ import (
 	errors "goCtrl/errhandle"
 	oscmd "goCtrl/oscmd"
 	parser "goCtrl/parser"
+	slice "goCtrl/utils/slice"
 	"os"
 	"strings"
 )
@@ -71,6 +72,15 @@ func createObjects(yaml *Yaml) {
 }
 
 func createObject(yaml *Yaml, name string) {
+	objects, err := yaml.Get("objects").Array()
+	if err != nil {
+		panic(err)
+	}
+
+	if !slice.ContainsString(objects, name) {
+		panic("Object name " + name + " not defined in config file")
+	}
+
 	oscmd.Run("kubectl", "apply", "-f", getBasePath(yaml)+name)
 }
 
