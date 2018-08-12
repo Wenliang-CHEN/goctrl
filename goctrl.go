@@ -66,7 +66,11 @@ func createObjects(yaml *Yaml) {
 		panic(err)
 	}
 
-	for _, objectName := range objects {
+	objectNames := slice.Map(objects, func(object interface{}) interface{} {
+		return slice.ToMap(object)["name"]
+	})
+
+	for _, objectName := range objectNames {
 		createObject(yaml, objectName.(string))
 	}
 }
@@ -87,7 +91,11 @@ func assertNameInConfig(yaml *Yaml, name string) {
 		panic(err)
 	}
 
-	if !slice.ContainsName(objects, name) {
+	isObjNameDefined := slice.Contains(objects, name, func(object interface{}, name interface{}) bool {
+		return slice.ToMap(object)["name"].(string) == name
+	})
+
+	if !isObjNameDefined {
 		panic("Object name " + name + " not defined in config file")
 	}
 }
