@@ -1,8 +1,7 @@
 # path of config files.  Use the object-name must equal to folder name for the config
 config-path: ""
-
-# Define kubernetes objects
-# - object-name:
 objects:
-  - "go-example"
-  
+  - name: "nginx"
+  - name: "config"
+    config:
+      CUSTOM_DATA: "Item 1"
