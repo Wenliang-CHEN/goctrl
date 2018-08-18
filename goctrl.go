@@ -2,6 +2,7 @@ package main
 
 import (
 	. "github.com/smallfish/simpleyaml"
+	config "goCtrl/config"
 	errors "goCtrl/errhandle"
 	oscmd "goCtrl/oscmd"
 	parser "goCtrl/parser"
@@ -19,7 +20,7 @@ var parameterContainsName = func(object interface{}, name interface{}) bool {
 func main() {
 	defer errors.HandleError()
 
-	parameters := parser.Parse("config/parameters.yaml")
+	parameters := parser.Parse(config.BASE_PATH + "parameters.yaml")
 	ctrlCmd := os.Args[1]
 
 	switch ctrlCmd {
@@ -112,12 +113,7 @@ func execCmdInPod(appName string, cmd string, innerArgs ...string) {
 }
 
 func getBuiltPath(yaml *Yaml) string {
-	path, err := yaml.Get("config-path").String()
-	if err != nil {
-		panic(err)
-	}
-	return path + "build/"
-
+	return config.BASE_PATH + "build/"
 }
 
 func stopMinikube() {
@@ -169,9 +165,5 @@ func getDefinedKubeObjects(yaml *Yaml) []interface{} {
 }
 
 func getTemplatePath(yaml *Yaml) string {
-	path, err := yaml.Get("config-path").String()
-	if err != nil {
-		panic(err)
-	}
-	return path + "template/"
+	return config.BASE_PATH + "template/"
 }

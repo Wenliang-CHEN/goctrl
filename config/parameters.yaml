@@ -1,7 +1,0 @@
-# path of config files.  Use the object-name must equal to folder name for the config
-config-path: ""
-objects:
-  - name: "nginx"
-  - name: "config"
-    config:
-      CUSTOM_DATA: "Item 1"
