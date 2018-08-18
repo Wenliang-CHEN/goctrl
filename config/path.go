@@ -1,3 +1,3 @@
 package config
 
-const BASE_PATH = "Put the base path of kubeneter objects here"
+const BASE_PATH = "/Users/bruceadmin/CodeBase/kubernetes-objects/"
