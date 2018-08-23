@@ -31,12 +31,7 @@ func Run(rawCmd string, args ...string) {
 	cmd.Wait()
 }
 
-func RunForResult(rawCmd string, args ...string) string {
+func RunForResult(rawCmd string, args ...string) (string, error) {
 	output, err := exec.Command(rawCmd, args...).Output()
-	if err != nil {
-		panic(err)
-	}
-
-	return string(output)
-
+	return string(output), err
 }

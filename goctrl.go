@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	. "github.com/smallfish/simpleyaml"
 	config "goCtrl/config"
 	errors "goCtrl/errhandle"
@@ -87,12 +88,20 @@ func createObjects(yaml *Yaml) {
 
 func createObject(yaml *Yaml, name string) {
 	assertNameInConfig(yaml, name)
+	deleteObject(yaml, name)
 	oscmd.Run("kubectl", "apply", "-f", getBuiltPath(yaml)+name)
 }
 
 func deleteObject(yaml *Yaml, name string) {
 	assertNameInConfig(yaml, name)
-	oscmd.Run("kubectl", "delete", "-f", getBuiltPath(yaml)+name)
+
+	result, err := oscmd.RunForResult("kubectl", "delete", "-f", getBuiltPath(yaml)+name)
+	if err != nil {
+		fmt.Println("Object \"" + name + "\" does not exist.  No deletion needed.")
+		return
+	}
+
+	fmt.Printf("%v", result)
 }
 
 func assertNameInConfig(yaml *Yaml, name string) {
@@ -106,7 +115,10 @@ func assertNameInConfig(yaml *Yaml, name string) {
 }
 
 func execCmdInPod(appName string, cmd string, innerArgs ...string) {
-	fullPodName := oscmd.RunForResult("kubectl", "get", "pod", "-l", "app="+appName, "-o", "name")
+	fullPodName, err := oscmd.RunForResult("kubectl", "get", "pod", "-l", "app="+appName, "-o", "name")
+	if err != nil {
+		panic(err)
+	}
 
 	baseKubeArgs := []string{"exec", strings.Trim(fullPodName, "pods/ \n"), cmd}
 	oscmd.Run("kubectl", append(baseKubeArgs, innerArgs...)...)
