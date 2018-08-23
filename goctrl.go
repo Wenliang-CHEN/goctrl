@@ -95,9 +95,9 @@ func createObject(yaml *Yaml, name string) {
 func deleteObject(yaml *Yaml, name string) {
 	assertNameInConfig(yaml, name)
 
-	result, err := oscmd.RunForResult("kubectl", "delete", "-f", getBuiltPath(yaml)+name)
-	if err != nil {
-		fmt.Println("Object \"" + name + "\" does not exist.  No deletion needed.")
+	result := oscmd.RunForResult("kubectl", "delete", "-f", getBuiltPath(yaml)+name)
+	if strings.Contains(result, "NotFound") {
+		fmt.Println("Object \"" + name + "\" does not exist.  No deletion executed.")
 		return
 	}
 
@@ -115,10 +115,7 @@ func assertNameInConfig(yaml *Yaml, name string) {
 }
 
 func execCmdInPod(appName string, cmd string, innerArgs ...string) {
-	fullPodName, err := oscmd.RunForResult("kubectl", "get", "pod", "-l", "app="+appName, "-o", "name")
-	if err != nil {
-		panic(err)
-	}
+	fullPodName := oscmd.RunForResult("kubectl", "get", "pod", "-l", "app="+appName, "-o", "name")
 
 	baseKubeArgs := []string{"exec", strings.Trim(fullPodName, "pods/ \n"), cmd}
 	oscmd.Run("kubectl", append(baseKubeArgs, innerArgs...)...)
