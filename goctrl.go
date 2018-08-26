@@ -88,6 +88,13 @@ func createObjects(yaml *Yaml) {
 func createObject(yaml *Yaml, name string) {
 	assertNameInConfig(yaml, name)
 	deleteObject(yaml, name)
+
+	deleted := false
+	objectConfigPath := getBuiltPath(yaml) + name
+	for !deleted {
+		deleted = strings.ContainsAny(oscmd.RunForResult("kubectl", "get", "-f", objectConfigPath), "NotFound Terminating")
+		time.Sleep(2 * time.Second)
+	}
 	oscmd.Run("kubectl", "apply", "-f", getBuiltPath(yaml)+name)
 }
 
