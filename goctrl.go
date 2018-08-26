@@ -10,13 +10,10 @@ import (
 	slice "goCtrl/utils/slice"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
-
-var parameterContainsName = func(object interface{}, name interface{}) bool {
-	return slice.ToMap(object)["name"].(string) == name
-}
 
 func main() {
 	defer errors.HandleError()
@@ -62,6 +59,8 @@ func main() {
 		}
 
 		execCmdInPod(os.Args[2], os.Args[3], os.Args[4:]...)
+	case "list":
+		list(parameters)
 	case "stop":
 		stopMinikube()
 	default:
@@ -104,6 +103,10 @@ func deleteObject(yaml *Yaml, name string) {
 	fmt.Printf("%v", result)
 }
 
+var parameterContainsName = func(object interface{}, name interface{}) bool {
+	return slice.ToMap(object)["name"].(string) == name
+}
+
 func assertNameInConfig(yaml *Yaml, name string) {
 	objects := getDefinedKubeObjects(yaml)
 
@@ -119,10 +122,6 @@ func execCmdInPod(appName string, cmd string, innerArgs ...string) {
 
 	baseKubeArgs := []string{"exec", strings.Trim(fullPodName, "pods/ \n"), cmd}
 	oscmd.Run("kubectl", append(baseKubeArgs, innerArgs...)...)
-}
-
-func getBuiltPath(yaml *Yaml) string {
-	return config.BASE_PATH + "build/"
 }
 
 func stopMinikube() {
@@ -157,13 +156,6 @@ func buildYaml(yaml *Yaml, name string) {
 	writeToBuild(yaml, name, content)
 }
 
-func writeToBuild(yaml *Yaml, name string, content string) {
-	buildPath := getBuiltPath(yaml) + name
-	oscmd.Run("rm", "-rf", buildPath)
-	oscmd.Run("mkdir", buildPath)
-	ioutil.WriteFile(buildPath+"/"+name+".yaml", []byte(content), 0644)
-}
-
 func getDefinedKubeObjects(yaml *Yaml) []interface{} {
 	objects, err := yaml.Get("objects").Array()
 	if err != nil {
@@ -171,6 +163,52 @@ func getDefinedKubeObjects(yaml *Yaml) []interface{} {
 	}
 
 	return objects
+}
+
+func writeToBuild(yaml *Yaml, name string, content string) {
+	buildPath := getBuiltPath(yaml) + name
+	oscmd.Run("rm", "-rf", buildPath)
+	oscmd.Run("mkdir", buildPath)
+	ioutil.WriteFile(buildPath+"/"+name+".yaml", []byte(content), 0644)
+}
+
+func list(yaml *Yaml) {
+	var objectTypes = make(map[string]bool)
+	err := filepath.Walk(getBuiltPath(yaml),
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if !strings.Contains(path, ".yaml") {
+				return nil
+			}
+
+			object := parser.Parse(path)
+			objectType, parseErr := object.Get("kind").String()
+			if parseErr != nil {
+				return parseErr
+			}
+
+			objectTypes[objectType] = true
+			return nil
+		})
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for objectType, _ := range objectTypes {
+		objectKeyword := strings.ToLower(objectType + "s")
+
+		fmt.Printf("%v: \n", objectKeyword)
+		oscmd.Run("kubectl", "get", objectKeyword)
+		fmt.Println()
+	}
+}
+
+func getBuiltPath(yaml *Yaml) string {
+	return config.BASE_PATH + "build/"
 }
 
 func getTemplatePath(yaml *Yaml) string {
