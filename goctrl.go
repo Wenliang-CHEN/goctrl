@@ -18,6 +18,10 @@ import (
 func main() {
 	defer errors.HandleError()
 
+	if len(os.Args) < 2 {
+		panic(errors.InvalidCommand)
+	}
+
 	parameters := parser.Parse(config.BASE_PATH + "parameters.yaml")
 	ctrlCmd := os.Args[1]
 
