@@ -27,6 +27,9 @@ func main() {
 
 	switch ctrlCmd {
 	case "start":
+		if isServerRunning() {
+			panic("Server is already running.")
+		}
 		startMinikube()
 		createObjects(parameters)
 	case "build":
@@ -70,6 +73,11 @@ func main() {
 	default:
 		panic(errors.InvalidCommand)
 	}
+}
+
+func isServerRunning() bool {
+	status := oscmd.RunForResult("minikube", "status")
+	return strings.Contains(status, "minikube: Running")
 }
 
 func startMinikube() {
