@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	. "github.com/smallfish/simpleyaml"
 	config "goCtrl/config"
@@ -30,8 +31,12 @@ func main() {
 		if isServerRunning() {
 			panic("Server is already running.")
 		}
+
 		startMinikube()
-		createObjects(parameters)
+
+		if *flag.Bool("createobjs", false, "create all defined kubernetes objects") {
+			createObjects(parameters)
+		}
 	case "build":
 		if len(os.Args) < 3 {
 			panic("Please enter a kubernetes config file to build.")
