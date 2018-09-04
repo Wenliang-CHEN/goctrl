@@ -67,6 +67,9 @@ func main() {
 
 		execCmdInPod(os.Args[2], os.Args[3], os.Args[4:]...)
 	case "list":
+		if !isServerRunning() {
+			panic("Kubernetes server is not running.  Please start first.")
+		}
 		list(parameters)
 	case "stop":
 		stopMinikube()
