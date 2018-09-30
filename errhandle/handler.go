@@ -2,6 +2,7 @@ package errhandle
 
 import (
 	"fmt"
+	help "goCtrl/help"
 )
 
 func HandleError() {
@@ -21,5 +22,5 @@ func HandleError() {
 
 // TODO: Add help text
 func printHelpText() {
-	fmt.Println("this is help text")
+	help.PrintHelpText()
 }
