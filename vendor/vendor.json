@@ -3,6 +3,12 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "fcfxNsCuheCrubAAl6zWgimCnLY=",
+			"path": "github.com/codegangsta/inject",
+			"revision": "33e0aa1cb7c019ccc3fbe049a8262a6403d30504",
+			"revisionTime": "2015-01-14T23:56:00Z"
+		},
+		{
 			"checksumSHA1": "1fMw8PH4tGzXvb0W1ZuxxESRcoA=",
 			"path": "github.com/smallfish/simpleyaml",
 			"revision": "a32031077861b1fbdf988d2c0865e98ec832dd4c",

@@ -8,6 +8,7 @@ import (
 	errors "goCtrl/errhandle"
 	oscmd "goCtrl/oscmd"
 	parser "goCtrl/parser"
+	provider "goCtrl/provider"
 	slice "goCtrl/utils/slice"
 	"io/ioutil"
 	"os"
@@ -17,7 +18,8 @@ import (
 )
 
 func main() {
-	defer errors.HandleError()
+	serviceContainer := provider.GetDependencyContainer()
+	defer serviceContainer.ErrorHandler.HandleError()
 
 	if len(os.Args) < 2 {
 		panic(errors.InvalidCommand)

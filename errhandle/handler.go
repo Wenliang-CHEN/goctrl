@@ -5,7 +5,11 @@ import (
 	help "goCtrl/help"
 )
 
-func HandleError() {
+type ErrorHandler struct {
+	helperTextPrinter help.HelpTextPrinter
+}
+
+func (handler ErrorHandler) HandleError() {
 	err := recover()
 	if err == nil {
 		return
@@ -14,13 +18,12 @@ func HandleError() {
 	switch err {
 	case InvalidCommand:
 		fmt.Println(err)
-		printHelpText()
+		handler.printHelpText()
 	default:
 		fmt.Println(err)
 	}
 }
 
-// TODO: Add help text
-func printHelpText() {
-	help.PrintHelpText()
+func (handler ErrorHandler) printHelpText() {
+	handler.helperTextPrinter.Print()
 }

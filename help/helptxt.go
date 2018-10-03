@@ -4,7 +4,9 @@ import (
 	"fmt"
 )
 
-func PrintHelpText() {
+type HelpTextPrinter struct{}
+
+func (printer HelpTextPrinter) Print() {
 	text :=
 		`
 goctrl controls the life circle of your minikube cluster and the kubernetes objects running on it.
