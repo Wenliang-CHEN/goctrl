@@ -7,7 +7,10 @@ import (
 	"os/exec"
 )
 
-func Run(rawCmd string, args ...string) {
+type Runner struct {
+}
+
+func (runnder Runner) Run(rawCmd string, args ...string) {
 	cmd := exec.Command(rawCmd, args...)
 
 	var stdoutBuf bytes.Buffer
@@ -31,7 +34,7 @@ func Run(rawCmd string, args ...string) {
 	cmd.Wait()
 }
 
-func RunForResult(rawCmd string, args ...string) string {
+func (runnder Runner) RunForResult(rawCmd string, args ...string) string {
 	cmd := exec.Command(rawCmd, args...)
 	var out bytes.Buffer
 	var stderr bytes.Buffer
